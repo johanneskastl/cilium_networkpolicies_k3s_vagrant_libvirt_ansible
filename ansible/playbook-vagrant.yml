@@ -11,3 +11,6 @@
 
 - name: 'Run playbook-nginx-denied.yml'
   ansible.builtin.import_playbook: playbook-nginx-denied.yml
+
+- name: 'Run playbook-output_urls.yml'
+  ansible.builtin.import_playbook: playbook-output_urls.yml
