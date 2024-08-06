@@ -32,6 +32,7 @@
       ansible.builtin.debug:
         msg:
           "
-          You can **NOT** access the nginx-denied deployment here (you get 'Bad Gateway'):
+          You can **NOT** access the nginx-denied deployment here
+          (you get 'upstream connect error or disconnect/reset before headers. reset reason: connection timeout'):
           http://nginx-denied.{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}.sslip.io
           "
