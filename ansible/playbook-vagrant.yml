@@ -8,3 +8,6 @@
 
 - name: 'Run playbook-nginx-allowed.yml'
   ansible.builtin.import_playbook: playbook-nginx-allowed.yml
+
+- name: 'Run playbook-nginx-denied.yml'
+  ansible.builtin.import_playbook: playbook-nginx-denied.yml
