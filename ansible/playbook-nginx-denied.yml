@@ -21,10 +21,14 @@
     - name: 'Create the nginx-denied namespace'
       delegate_to: 'localhost'
       kubernetes.core.k8s:
-        name: 'nginx-denied'
-        api_version: 'v1'
-        kind: 'Namespace'
         state: 'present'
+        resource_definition: |
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            labels:
+              kubernetes.io/metadata.name: nginx-denied
+            name: nginx-denied
 
     - name: 'Create the network policy for the nginx-denied namespace'
       delegate_to: 'localhost'
