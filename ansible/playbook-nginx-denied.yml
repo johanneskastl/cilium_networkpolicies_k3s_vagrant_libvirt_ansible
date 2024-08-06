@@ -45,6 +45,32 @@
             policyTypes:
             - Ingress
 
+    - name: 'Install the nginx-denied HTTPRoute'
+      # running this from vagrant fails, if we target localhost directly
+      delegate_to: 'localhost'
+      kubernetes.core.k8s:
+        state: 'present'
+        resource_definition: |
+          apiVersion: gateway.networking.k8s.io/v1
+          kind: HTTPRoute
+          metadata:
+            name: nginx-denied-httproute
+            namespace: nginx-denied
+          spec:
+            parentRefs:
+            - name: cilium-gateway
+              namespace: kube-system
+            hostnames:
+            - "nginx-denied.{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}.sslip.io"
+            rules:
+            - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+              backendRefs:
+              - name: nginx-denied
+                port: 80
+
     - name: 'Install Nginx via helm chart'
       # running this from vagrant fails, if we target localhost directly
       delegate_to: 'localhost'
@@ -63,8 +89,7 @@
           networkPolicy:
             enabled: false
           ingress:
-            enabled: true
-            hostname: "nginx-denied.{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}.sslip.io"
+            enabled: false
 
     - name: 'Wait until all pods in the nginx-denied namespace are running'
       delegate_to: localhost
