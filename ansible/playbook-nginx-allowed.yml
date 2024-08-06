@@ -1,0 +1,82 @@
+---
+
+- name: 'Gather facts'
+  hosts: 'all'
+  gather_facts: true
+
+- name: 'Install Nginx and allow access to the namespace from Traefik'
+  hosts: 'k3s1'
+  gather_facts: false
+  become: false
+  module_defaults:
+    kubernetes.core.helm:
+      kubeconfig: './k3s-kubeconfig'
+    kubernetes.core.k8s:
+      kubeconfig: './k3s-kubeconfig'
+    kubernetes.core.k8s_info:
+      kubeconfig: './k3s-kubeconfig'
+
+  tasks:
+
+    - name: 'Create the nginx-allowed namespace'
+      delegate_to: 'localhost'
+      kubernetes.core.k8s:
+        state: 'present'
+        resource_definition: |
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            labels:
+              kubernetes.io/metadata.name: nginx-allowed
+            name: nginx-allowed
+
+    - name: 'Create the network policy for the nginx-allowed namespace'
+      delegate_to: 'localhost'
+      kubernetes.core.k8s:
+        state: 'present'
+        resource_definition: |
+          kind: NetworkPolicy
+          apiVersion: networking.k8s.io/v1
+          metadata:
+            name: nginx-allowed
+            namespace: nginx-allowed
+          spec:
+            podSelector: {}
+            policyTypes:
+            - Ingress
+            ingress:
+            - from:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: kube-system
+              - podSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: traefik-kube-system
+
+    - name: 'Install Nginx via helm chart'
+      # running this from vagrant fails, if we target localhost directly
+      delegate_to: 'localhost'
+      kubernetes.core.helm:
+        release_name: 'nginx-allowed'
+        chart_ref: 'oci://registry-1.docker.io/bitnamicharts/nginx'
+        release_namespace: 'nginx-allowed'
+        values:
+          containerPorts:
+            http: 8080
+            https: null
+          service:
+            type: ClusterIP
+          networkPolicy:
+            enabled: false
+          ingress:
+            enabled: true
+            hostname: "nginx-allowed.{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}.sslip.io"
+
+    - name: 'Wait for URL to be available'
+      ansible.builtin.uri:
+        url: "http://nginx-allowed.{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}.sslip.io"
+      register: result
+      until: "result.status == 200"
+      retries: 31
+      delay: 10
+      delegate_to: 'localhost'
