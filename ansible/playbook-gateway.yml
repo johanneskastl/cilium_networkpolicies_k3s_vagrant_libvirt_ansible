@@ -1,0 +1,36 @@
+---
+
+- name: 'Install the GatewayAPI Gateway resource'
+  hosts: 'k3s1'
+  gather_facts: false
+  become: false
+  module_defaults:
+    kubernetes.core.helm:
+      kubeconfig: './k3s-kubeconfig'
+    kubernetes.core.k8s:
+      kubeconfig: './k3s-kubeconfig'
+    kubernetes.core.k8s_info:
+      kubeconfig: './k3s-kubeconfig'
+
+  tasks:
+
+    - name: 'Install the Gateway'
+      # running this from vagrant fails, if we target localhost directly
+      delegate_to: 'localhost'
+      kubernetes.core.k8s:
+        state: 'present'
+        resource_definition: |
+          apiVersion: gateway.networking.k8s.io/v1
+          kind: Gateway
+          metadata:
+            name: cilium-gateway
+            namespace: kube-system
+          spec:
+            gatewayClassName: cilium
+            listeners:
+            - protocol: HTTP
+              port: 80
+              name: http
+              allowedRoutes:
+                namespaces:
+                  from: All
