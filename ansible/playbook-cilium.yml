@@ -49,14 +49,12 @@
             replicas: 1
           nodePort:
             enabled: true
+          kubeProxyReplacement: false
           ingressController:
+            enabled: false
+          gatewayAPI:
             enabled: true
-            loadbalancerMode: 'shared'
-            default: true
           l7Proxy: true
-          loadBalancer:
-            l7:
-              backend: 'envoy'
 
     - name: 'Wait until all pods are running'
       delegate_to: localhost
