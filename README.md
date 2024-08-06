@@ -19,6 +19,10 @@ VM's IP will be) is denied by the NetworkPolicy that denies all access to the
 The `main` branch uses Cilium's own `CiliumNetworkPolicy` resources, while the
 `kubernetes` branch uses the vanilla Kubernetes `NetworkPolicy` resources.
 
+The branch `gateway_api` uses Cilium's GatewayAPI implementation instead of the
+Kubernetes Ingress, i.e. there is no ingress controller running. Instead of
+`Ingress` resources, `Gateway` and `HTTPRoute` resources are being used.
+
 Default OS is openSUSE Leap 15.6, but that can be changed in the Vagrantfile.
 Please be aware, that this might break the Ansible provisioning.
 
