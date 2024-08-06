@@ -23,6 +23,13 @@ The branch `gateway_api` uses Cilium's GatewayAPI implementation instead of the
 Kubernetes Ingress, i.e. there is no ingress controller running. Instead of
 `Ingress` resources, `Gateway` and `HTTPRoute` resources are being used.
 
+The branch `gateway_api_kubernetes` uses Cilium's GatewayAPI implementation
+instead of the Kubernetes Ingress, i.e. there is no ingress controller running.
+Instead of `Ingress` resources, `Gateway` and `HTTPRoute` resources are being
+used.
+In contrast to the `gateway_api` branch it uses regular Kubernetes
+`NetworkPolicy` resources.
+
 Default OS is openSUSE Leap 15.6, but that can be changed in the Vagrantfile.
 Please be aware, that this might break the Ansible provisioning.
 
