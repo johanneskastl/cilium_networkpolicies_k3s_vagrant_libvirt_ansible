@@ -1,0 +1,61 @@
+---
+
+- name: 'Gather facts'
+  hosts: 'all'
+  gather_facts: true
+
+- name: 'Install Nginx but deny all access to the nginx-denied namespace'
+  hosts: 'k3s1'
+  gather_facts: false
+  become: false
+  module_defaults:
+    kubernetes.core.helm:
+      kubeconfig: './k3s-kubeconfig'
+    kubernetes.core.k8s:
+      kubeconfig: './k3s-kubeconfig'
+    kubernetes.core.k8s_info:
+      kubeconfig: './k3s-kubeconfig'
+
+  tasks:
+
+    - name: 'Create the nginx-denied namespace'
+      delegate_to: 'localhost'
+      kubernetes.core.k8s:
+        name: 'nginx-denied'
+        api_version: 'v1'
+        kind: 'Namespace'
+        state: 'present'
+
+    - name: 'Create the network policy for the nginx-denied namespace'
+      delegate_to: 'localhost'
+      kubernetes.core.k8s:
+        state: 'present'
+        resource_definition: |
+          kind: NetworkPolicy
+          apiVersion: networking.k8s.io/v1
+          metadata:
+            name: nginx-denied
+            namespace: nginx-denied
+          spec:
+            podSelector: {}
+            policyTypes:
+            - Ingress
+
+    - name: 'Install Nginx via helm chart'
+      # running this from vagrant fails, if we target localhost directly
+      delegate_to: 'localhost'
+      kubernetes.core.helm:
+        release_name: 'nginx-denied'
+        chart_ref: 'oci://registry-1.docker.io/bitnamicharts/nginx'
+        release_namespace: 'nginx-denied'
+        values:
+          containerPorts:
+            http: 8080
+            https: null
+          service:
+            type: ClusterIP
+          networkPolicy:
+            enabled: false
+          ingress:
+            enabled: true
+            hostname: "nginx-denied.{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}.sslip.io"
