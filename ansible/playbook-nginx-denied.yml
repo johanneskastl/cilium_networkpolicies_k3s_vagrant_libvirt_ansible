@@ -54,6 +54,8 @@
             https: null
           service:
             type: ClusterIP
+          tls:
+            enabled: false
           networkPolicy:
             enabled: false
           ingress:
