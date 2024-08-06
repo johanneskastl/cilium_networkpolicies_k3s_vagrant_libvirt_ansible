@@ -6,6 +6,9 @@
 - name: 'Run playbook-cilium.yml'
   ansible.builtin.import_playbook: playbook-cilium.yml
 
+- name: 'Run playbook-gateway.yml'
+  ansible.builtin.import_playbook: playbook-gateway.yml
+
 - name: 'Run playbook-nginx-allowed.yml'
   ansible.builtin.import_playbook: playbook-nginx-allowed.yml
 
