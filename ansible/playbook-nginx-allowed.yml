@@ -35,17 +35,13 @@
       kubernetes.core.k8s:
         state: 'present'
         resource_definition: |
-          kind: NetworkPolicy
-          apiVersion: networking.k8s.io/v1
+          apiVersion: "cilium.io/v2"
+          kind: CiliumNetworkPolicy
           metadata:
             name: nginx-allowed
             namespace: nginx-allowed
           spec:
-            podSelector: {}
-            policyTypes:
-            - Ingress
-            ingress:
-            - {}
+            endpointSelector: {}
 
     - name: 'Install the nginx-allowed HTTPRoute'
       # running this from vagrant fails, if we target localhost directly
