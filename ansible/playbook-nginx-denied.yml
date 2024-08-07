@@ -35,15 +35,17 @@
       kubernetes.core.k8s:
         state: 'present'
         resource_definition: |
-          kind: NetworkPolicy
-          apiVersion: networking.k8s.io/v1
+          apiVersion: "cilium.io/v2"
+          kind: CiliumNetworkPolicy
           metadata:
             name: nginx-denied
             namespace: nginx-denied
           spec:
-            podSelector: {}
-            policyTypes:
-            - Ingress
+            endpointSelector: {}
+            egress:
+            - {}
+            ingress:
+            - {}
 
     - name: 'Install Nginx via helm chart'
       # running this from vagrant fails, if we target localhost directly
